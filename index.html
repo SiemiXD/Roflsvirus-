@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>⚠️ SYSTEM ALERT ⚠️</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Courier New', Courier, monospace;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      background: #000;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      position: relative;
+      cursor: none;
+    }
+
+    /* ==================== ФОНОВЫЕ СЛОИ ==================== */
+    #matrix {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    .red-pulse {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(circle, rgba(255,0,0,0) 0%, rgba(255,0,0,0.12) 60%, rgba(255,0,0,0.45) 100%);
+      z-index: 1;
+      pointer-events: none;
+      animation: pulseRed 1.1s infinite alternate;
+    }
+
+    @keyframes pulseRed {
+      0% { opacity: 0.25; }
+      100% { opacity: 1; }
+    }
+
+    .scanlines {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0,0,0,0.18) 0px,
+        rgba(0,0,0,0.18) 2px,
+        transparent 2px,
+        transparent 4px
+      );
+      z-index: 2;
+      pointer-events: none;
+      animation: scanMove 0.2s linear infinite;
+    }
+
+    @keyframes scanMove {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(4px); }
+    }
+
+    /* VHS-шум поверх всего */
+    .vhs-noise {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 3;
+      pointer-events: none;
+      opacity: 0.06;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      animation: noiseShift 0.15s steps(2) infinite;
+      mix-blend-mode: screen;
+    }
+
+    @keyframes noiseShift {
+      0% { transform: translate(0,0); }
+      25% { transform: translate(-5%, 5%); }
+      50% { transform: translate(5%, -5%); }
+      75% { transform: translate(-3%, -3%); }
+      100% { transform: translate(3%, 3%); }
+    }
+
+    /* Хроматическая аберрация по краям */
+    .chromatic {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 4;
+      pointer-events: none;
+      box-shadow: inset 0 0 120px rgba(255,0,0,0.5), inset 0 0 40px rgba(0,255,255,0.15);
+      animation: chromaticShift 0.4s infinite alternate;
+    }
+
+    @keyframes chromaticShift {
+      0% { box-shadow: inset 5px 0 120px rgba(255,0,0,0.5), inset -5px 0 120px rgba(0,255,255,0.15); }
+      100% { box-shadow: inset -5px 0 120px rgba(255,0,0,0.5), inset 5px 0 120px rgba(0,255,255,0.15); }
+    }
+
+    /* ==================== КОНТЕЙНЕРЫ ==================== */
+    #windows-container {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    /* ==================== ВИРУСНЫЕ ОКНА ==================== */
+    .virus-window {
+      position: absolute;
+      background: #0a0a0a;
+      border: 2px solid #ff0000;
+      border-radius: 4px;
+      box-shadow: 0 0 20px #ff0000, 0 0 60px #ff000066, inset 0 0 20px #ff000033;
+      color: #ff3333;
+      font-weight: bold;
+      padding: 8px 14px 12px 14px;
+      min-width: 220px;
+      max-width: 340px;
+      pointer-events: none;
+      animation: windowGlitch 0.15s infinite alternate, floatWindow 3s ease-in-out infinite;
+      text-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000;
+      font-size: 13px;
+      letter-spacing: 1px;
+      z-index: 20;
+      overflow: hidden;
+      backdrop-filter: blur(1px);
+    }
+
+    .virus-window .title-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #ff000055;
+      padding-bottom: 4px;
+      margin-bottom: 6px;
+      font-size: 10px;
+      color: #ff6666;
+      text-transform: uppercase;
+    }
+
+    .virus-window .close-btn {
+      color: #ff0000;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .virus-window .content {
+      font-size: 13px;
+      line-height: 1.3;
+      word-break: break-word;
+    }
+
+    .virus-window .blink-cursor {
+      display: inline-block;
+      width: 8px;
+      height: 14px;
+      background: #ff0000;
+      margin-left: 2px;
+      animation: blink 0.6s step-end infinite;
+      vertical-align: text-bottom;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    @keyframes windowGlitch {
+      0% { transform: translate(0, 0) skewX(0deg); }
+      20% { transform: translate(-1px, 0) skewX(1deg); }
+      40% { transform: translate(1px, 0) skewX(-1deg); }
+      60% { transform: translate(0, -1px) skewX(0deg); }
+      80% { transform: translate(0, 1px) skewX(0.5deg); }
+      100% { transform: translate(0, 0) skewX(0deg); }
+    }
+
+    @keyframes floatWindow {
+      0% { transform: translateY(0px) rotate(0deg); }
+      25% { transform: translateY(-6px) rotate(0.3deg); }
+      50% { transform: translateY(0px) rotate(-0.3deg); }
+      75% { transform: translateY(6px) rotate(0.2deg); }
+      100% { transform: translateY(0px) rotate(0deg); }
+    }
+
+    /* ==================== ЦЕНТРАЛЬНОЕ СООБЩЕНИЕ ==================== */
+    .center-alert {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 100;
+      text-align: center;
+      pointer-events: none;
+      width: 90%;
+      max-width: 700px;
+      animation: centerGlitch 0.25s infinite alternate;
+    }
+
+    .center-alert h1 {
+      font-size: clamp(2rem, 8vw, 5rem);
+      color: #ff0000;
+      text-shadow: 0 0 10px #ff0000, 0 0 30px #ff0000, 0 0 60px #ff0000;
+      letter-spacing: 8px;
+      font-weight: 900;
+      text-transform: uppercase;
+      animation: textFlicker 0.08s infinite alternate;
+    }
+
+    .center-alert .sub {
+      font-size: clamp(0.7rem, 2vw, 1.2rem);
+      color: #ff4444;
+      margin-top: 12px;
+      letter-spacing: 4px;
+      text-shadow: 0 0 8px #ff0000;
+      opacity: 0.9;
+    }
+
+    .center-alert .btc {
+      margin-top: 18px;
+      font-size: clamp(0.65rem, 1.8vw, 1rem);
+      color: #ffcc00;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px #ffcc00;
+      border: 1px dashed #ffcc0055;
+      padding: 8px 16px;
+      display: inline-block;
+      border-radius: 3px;
+      animation: btcBlink 1.5s infinite;
+    }
+
+    @keyframes btcBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    @keyframes textFlicker {
+      0% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0.82; transform: scale(1.02); }
+    }
+
+    @keyframes centerGlitch {
+      0% { transform: translate(-50%, -50%) skewX(0deg) scale(1); }
+      50% { transform: translate(-50.5%, -49.5%) skewX(0.5deg) scale(1.005); }
+      100% { transform: translate(-49.5%, -50.5%) skewX(-0.5deg) scale(0.998); }
+    }
+
+    /* ==================== ERROR ПОПАПЫ ==================== */
+    .error-popup {
+      position: fixed;
+      background: rgba(20, 0, 0, 0.92);
+      border: 2px solid #ff0000;
+      color: #ff0000;
+      font-size: 12px;
+      font-weight: bold;
+      padding: 10px 18px;
+      border-radius: 4px;
+      box-shadow: 0 0 25px #ff0000, 0 0 50px #ff000055;
+      z-index: 200;
+      pointer-events: none;
+      white-space: nowrap;
+      animation: popupFlash 0.5s ease-in-out infinite alternate, popupFloat 2s ease-in-out infinite;
+      text-shadow: 0 0 6px #ff0000;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 1px;
+    }
+
+    @keyframes popupFlash {
+      0% { background: rgba(20,0,0,0.92); border-color: #ff0000; }
+      100% { background: rgba(60,0,0,0.98); border-color: #ff5555; }
+    }
+
+    @keyframes popupFloat {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+      100% { transform: translateY(0); }
+    }
+
+    /* ==================== ПРОГРЕСС ЗАРАЖЕНИЯ ==================== */
+    .infection-bar {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      max-width: 500px;
+      z-index: 150;
+      background: #110000;
+      border: 1px solid #ff0000;
+      border-radius: 3px;
+      padding: 3px;
+      box-shadow: 0 0 15px #ff0000;
+    }
+
+    .infection-bar .fill {
+      height: 10px;
+      width: 0%;
+      background: linear-gradient(90deg, #ff0000, #ff4444, #ff0000);
+      border-radius: 2px;
+      animation: fillProgress 12s linear infinite;
+      box-shadow: 0 0 10px #ff0000;
+    }
+
+    .infection-bar .label {
+      text-align: center;
+      font-size: 10px;
+      color: #ff4444;
+      margin-top: 3px;
+      letter-spacing: 3px;
+      text-shadow: 0 0 5px #ff0000;
+    }
+
+    @keyframes fillProgress {
+      0% { width: 0%; }
+      25% { width: 30%; }
+      50% { width: 55%; }
+      75% { width: 80%; }
+      100% { width: 100%; }
+    }
+
+    /* ==================== КУРСОР ==================== */
+    .crosshair {
+      position: fixed;
+      width: 40px;
+      height: 40px;
+      border: 2px solid #ff0000;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 15px #ff0000;
+      animation: crosshairPulse 0.6s infinite alternate;
+      mix-blend-mode: screen;
+    }
+
+    .crosshair::before,
+    .crosshair::after {
+      content: '';
+      position: absolute;
+      background: #ff0000;
+    }
+
+    .crosshair::before {
+      width: 2px;
+      height: 14px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .crosshair::after {
+      width: 14px;
+      height: 2px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    @keyframes crosshairPulse {
+      0% { width: 36px; height: 36px; opacity: 0.7; }
+      100% { width: 44px; height: 44px; opacity: 1; }
+    }
+
+    /* ==================== ГЛИТЧ-ПОЛОСЫ ==================== */
+    .glitch-bar {
+      position: fixed;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: #ff0000;
+      z-index: 5;
+      pointer-events: none;
+      opacity: 0.6;
+      animation: glitchBarMove 0.3s infinite alternate;
+    }
+
+    @keyframes glitchBarMove {
+      0% { transform: translateX(-20%); opacity: 0.2; }
+      100% { transform: translateX(20%); opacity: 0.8; }
+    }
+
+    /* ==================== HUD ТЕРМИНАЛ (лог событий) ==================== */
+    .hud-log {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      width: 340px;
+      max-width: 45vw;
+      max-height: 30vh;
+      overflow: hidden;
+      z-index: 90;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      color: #ff3333;
+      text-shadow: 0 0 6px #ff0000;
+      background: rgba(10, 0, 0, 0.6);
+      border: 1px solid #ff000055;
+      border-left: 3px solid #ff0000;
+      padding: 8px 10px;
+      pointer-events: none;
+      backdrop-filter: blur(2px);
+      line-height: 1.5;
+    }
+
+    .hud-log .hud-title {
+      color: #ff0000;
+      font-weight: bold;
+      border-bottom: 1px solid #ff000044;
+      padding-bottom: 4px;
+      margin-bottom: 6px;
+      letter-spacing: 2px;
+      font-size: 10px;
+      animation: blink 1s step-end infinite;
+    }
+
+    .hud-log .log-line {
+      opacity: 0;
+      animation: logFadeIn 0.3s forwards;
+    }
+
+    @keyframes logFadeIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 0.9; transform: translateX(0); }
+    }
+
+    /* ==================== СТАТИСТИКА / ДАННЫЕ ==================== */
+    .hud-stats {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 260px;
+      max-width: 40vw;
+      z-index: 90;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      color: #ff3333;
+      text-shadow: 0 0 6px #ff0000;
+      background: rgba(10, 0, 0, 0.6);
+      border: 1px solid #ff000055;
+      border-right: 3px solid #ff0000;
+      padding: 8px 10px;
+      pointer-events: none;
+      backdrop-filter: blur(2px);
+      line-height: 1.7;
+    }
+
+    .hud-stats .stat-row {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px dotted #ff000033;
+      padding: 2px 0;
+    }
+
+    .hud-stats .stat-value {
+      color: #ff6666;
+      font-weight: bold;
+    }
+
+    .hud-stats .stat-value.danger {
+      color: #ff0000;
+      animation: blink 0.8s step-end infinite;
+    }
+
+    /* ==================== MINI КАМЕРА (иллюзия доступа) ==================== */
+    .cam-access {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      width: 160px;
+      height: 120px;
+      z-index: 90;
+      border: 2px solid #ff0000;
+      background: #0a0000;
+      box-shadow: 0 0 20px #ff0000, inset 0 0 30px #000;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .cam-access .cam-label {
+      position: absolute;
+      top: 4px;
+      left: 6px;
+      font-size: 9px;
+      color: #ff0000;
+      font-family: 'Courier New', monospace;
+      text-shadow: 0 0 5px #ff0000;
+      z-index: 2;
+      animation: blink 1s step-end infinite;
+    }
+
+    .cam-access .cam-rec {
+      position: absolute;
+      top: 4px;
+      right: 6px;
+      width: 8px;
+      height: 8px;
+      background: #ff0000;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #ff0000;
+      animation: blink 0.8s step-end infinite;
+      z-index: 2;
+    }
+
+    .cam-access .cam-feed {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: repeating-linear-gradient(0deg, rgba(255,0,0,0.05) 0px, transparent 2px, transparent 4px);
+      animation: camScan 4s linear infinite;
+    }
+
+    .cam-access .cam-feed::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(circle at 50% 60%, rgba(255,80,80,0.15) 0%, transparent 60%);
+      animation: camPulse 2s infinite alternate;
+    }
+
+    .cam-access .cam-noise {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.15;
+      animation: noiseShift 0.1s steps(2) infinite;
+      mix-blend-mode: screen;
+    }
+
+    .cam-access .cam-scanline {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: #ff0000;
+      box-shadow: 0 0 15px #ff0000;
+      animation: camScanLine 2.5s linear infinite;
+      opacity: 0.7;
+    }
+
+    @keyframes camScanLine {
+      0% { top: -5%; }
+      100% { top: 105%; }
+    }
+
+    @keyframes camScan {
+      0% { background-position: 0 0; }
+      100% { background-position: 0 100px; }
+    }
+
+    @keyframes camPulse {
+      0% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    .cam-access .silhouette {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 70px;
+      background: rgba(255, 40, 40, 0.12);
+      border-radius: 50% 50% 0 0;
+      filter: blur(6px);
+      animation: silhouetteMove 3s ease-in-out infinite alternate;
+    }
+
+    .cam-access .silhouette::before {
+      content: '';
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 32px;
+      height: 32px;
+      background: rgba(255, 40, 40, 0.15);
+      border-radius: 50%;
+      filter: blur(4px);
+    }
+
+    @keyframes silhouetteMove {
+      0% { transform: translateX(-50%) translateY(0) scaleX(1); }
+      100% { transform: translateX(-50%) translateY(-3px) scaleX(1.05); }
+    }
+
+    /* ==================== ВСПЛЫВАЮЩИЕ ДАННЫЕ (кража) ==================== */
+    .data-stream {
+      position: fixed;
+      z-index: 85;
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      color: #ff4444;
+      text-shadow: 0 0 5px #ff0000;
+      pointer-events: none;
+      opacity: 0;
+      white-space: nowrap;
+      animation: dataFloat 4s linear forwards;
+    }
+
+    @keyframes dataFloat {
+      0% { opacity: 0; transform: translateY(20px) scale(0.9); }
+      10% { opacity: 0.9; }
+      80% { opacity: 0.7; }
+      100% { opacity: 0; transform: translateY(-60px) scale(1.05); }
+    }
+
+    /* ==================== ФЕЙКОВОЕ УВЕДОМЛЕНИЕ БРАУЗЕРА ==================== */
+    .browser-fake-notif {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      width: 320px;
+      max-width: 85vw;
+      background: #0d0d0d;
+      border: 1px solid #ff0000;
+      border-radius: 8px;
+      box-shadow: 0 0 30px #ff0000aa;
+      z-index: 500;
+      padding: 12px 14px;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      color: #eee;
+      animation: notifSlide 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2) forwards;
+      pointer-events: none;
+    }
+
+    @keyframes notifSlide {
+      from { transform: translateX(120%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    .browser-fake-notif .nf-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .browser-fake-notif .nf-icon {
+      width: 22px;
+      height: 22px;
+      background: #ff0000;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #fff;
+      font-weight: bold;
+      animation: iconShake 0.3s infinite;
+    }
+
+    @keyframes iconShake {
+      0%, 100% { transform: rotate(0); }
+      25% { transform: rotate(-8deg); }
+      75% { transform: rotate(8deg); }
+    }
+
+    .browser-fake-notif .nf-title {
+      font-weight: 600;
+      font-size: 13px;
+      color: #ff4444;
+    }
+
+    .browser-fake-notif .nf-body {
+      font-size: 12px;
+      color: #bbb;
+      line-height: 1.4;
+    }
+
+    .browser-fake-notif .nf-app {
+      font-size: 10px;
+      color: #666;
+      margin-top: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ==================== ОКНО "ПОКУПКА КЛЮЧА" ==================== */
+    .ransom-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 400;
+      background: #0a0000;
+      border: 2px solid #ff0000;
+      border-radius: 6px;
+      box-shadow: 0 0 60px #ff0000, inset 0 0 40px #1a0000;
+      width: 420px;
+      max-width: 90vw;
+      padding: 20px 24px;
+      color: #ff3333;
+      font-family: 'Courier New', monospace;
+      text-align: center;
+      animation: modalPulse 2s infinite alternate;
+      pointer-events: none;
+    }
+
+    .ransom-modal::before {
+      content: '☠';
+      position: absolute;
+      top: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 30px;
+      color: #ff0000;
+      text-shadow: 0 0 20px #ff0000;
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes modalPulse {
+      0% { box-shadow: 0 0 40px #ff0000aa, inset 0 0 30px #1a0000; }
+      100% { box-shadow: 0 0 80px #ff0000, inset 0 0 50px #330000; }
+    }
+
+    .ransom-modal h2 {
+      font-size: 20px;
+      letter-spacing: 3px;
+      margin-bottom: 8px;
+      text-shadow: 0 0 10px #ff0000;
+      animation: blink 1.2s step-end infinite;
+    }
+
+    .ransom-modal .price {
+      font-size: 34px;
+      color: #ffcc00;
+      text-shadow: 0 0 15px #ffcc00, 0 0 30px #ffcc00;
+      margin: 12px 0;
+      font-weight: 900;
+      letter-spacing: 2px;
+    }
+
+    .ransom-modal .wallet {
+      background: #150000;
+      border: 1px dashed #ff000055;
+      padding: 8px 10px;
+      font-size: 10px;
+      color: #ff6666;
+      word-break: break-all;
+      margin: 10px 0;
+      letter-spacing: 0.5px;
+      user-select: text;
+    }
+
+    .ransom-modal .timer {
+      font-size: 22px;
+      color: #ff0000;
+      margin: 10px 0;
+      text-shadow: 0 0 10px #ff0000;
+      font-weight: bold;
+    }
+
+    .ransom-modal .warn {
+      font-size: 10px;
+      color: #ff4444;
+      opacity: 0.8;
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    /* ==================== ФЕЙКОВЫЕ ИКОНКИ СИСТЕМЫ ==================== */
+    .fake-taskbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 34px;
+      background: rgba(10, 0, 0, 0.9);
+      border-top: 1px solid #ff000066;
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      gap: 6px;
+      pointer-events: none;
+      box-shadow: 0 -5px 20px #ff000033;
+    }
+
+    .fake-taskbar .task-icon {
+      width: 22px;
+      height: 22px;
+      border: 1px solid #ff000066;
+      background: #1a0000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: #ff3333;
+      border-radius: 3px;
+      animation: taskGlitch 3s infinite;
+    }
+
+    .fake-taskbar .task-icon:nth-child(2n) {
+      animation-delay: 0.7s;
+    }
+
+    .fake-taskbar .task-icon:nth-child(3n) {
+      animation-delay: 1.4s;
+    }
+
+    @keyframes taskGlitch {
+      0%, 90%, 100% { background: #1a0000; color: #ff3333; }
+      95% { background: #ff0000; color: #000; }
+    }
+
+    .fake-taskbar .task-time {
+      margin-left: auto;
+      font-size: 10px;
+      color: #ff4444;
+      font-family: 'Courier New', monospace;
+      text-shadow: 0 0 5px #ff0000;
+      letter-spacing: 1px;
+    }
+
+    /* ==================== АДАПТИВ ==================== */
+    @media (max-width: 700px) {
+      .virus-window {
+        min-width: 160px;
+        max-width: 220px;
+        font-size: 10px;
+        padding: 5px 8px 8px 8px;
+      }
+      .center-alert h1 {
+        letter-spacing: 3px;
+      }
+      .hud-log { width: 200px; font-size: 9px; }
+      .hud-stats { width: 150px; font-size: 9px; }
+      .cam-access { width: 100px; height: 75px; bottom: 60px; }
+      .ransom-modal { padding: 14px; }
+      .ransom-modal .price { font-size: 24px; }
+      .ransom-modal .timer { font-size: 16px; }
+      .browser-fake-notif { width: 240px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== ФОН ==================== -->
+  <canvas id="matrix"></canvas>
+  <div class="red-pulse"></div>
+  <div class="scanlines"></div>
+  <div class="vhs-noise"></div>
+  <div class="chromatic"></div>
+
+  <div class="glitch-bar" style="top:10%; animation-delay:0.05s;"></div>
+  <div class="glitch-bar" style="top:25%; animation-delay:0.2s;"></div>
+  <div class="glitch-bar" style="top:42%; animation-delay:0.35s;"></div>
+  <div class="glitch-bar" style="top:58%; animation-delay:0.1s;"></div>
+  <div class="glitch-bar" style="top:75%; animation-delay:0.28s;"></div>
+  <div class="glitch-bar" style="top:91%; animation-delay:0.15s;"></div>
+
+  <!-- ==================== ЦЕНТРАЛЬНЫЙ АЛЕРТ ==================== -->
+  <div class="center-alert">
+    <h1>⚠ SYSTEM HACKED ⚠</h1>
+    <div class="sub">YOUR DEVICE IS INFECTED</div>
+    <div class="sub" style="font-size:clamp(0.5rem,1.5vw,0.9rem); margin-top:6px; opacity:0.7;">
+      ALL FILES ENCRYPTED — PAY TO RESTORE
+    </div>
+    <div class="btc">⛓ 0.5 BTC ⛓</div>
+  </div>
+
+  <!-- ==================== HUD ЛОГ ==================== -->
+  <div class="hud-log" id="hudLog">
+    <div class="hud-title">▶ SYSTEM LOG — LIVE</div>
+    <div id="logLines"></div>
+  </div>
+
+  <!-- ==================== HUD СТАТИСТИКА ==================== -->
+  <div class="hud-stats">
+    <div class="stat-row"><span>CPU LOAD</span><span class="stat-value danger" id="cpuVal">100%</span></div>
+    <div class="stat-row"><span>RAM USAGE</span><span class="stat-value danger" id="ramVal">98%</span></div>
+    <div class="stat-row"><span>DISK I/O</span><span class="stat-value" id="diskVal">1.2 GB/s</span></div>
+    <div class="stat-row"><span>NETWORK</span><span class="stat-value danger" id="netVal">↑ 45 MB/s</span></div>
+    <div class="stat-row"><span>PROCESSES</span><span class="stat-value" id="procVal">247</span></div>
+    <div class="stat-row"><span>ENCRYPTED</span><span class="stat-value" id="filesVal">1,240</span></div>
+    <div class="stat-row"><span>REMOTE IP</span><span class="stat-value" id="ipVal">185.xx.xx.xx</span></div>
+    <div class="stat-row"><span>STATUS</span><span class="stat-value danger">COMPROMISED</span></div>
+  </div>
+
+  <!-- ==================== ИЛЛЮЗИЯ КАМЕРЫ ==================== -->
+  <div class="cam-access">
+    <div class="cam-label">● CAM 01 — LIVE</div>
+    <div class="cam-rec"></div>
+    <div class="cam-feed"></div>
+    <div class="cam-noise"></div>
+    <div class="silhouette"></div>
+    <div class="cam-scanline"></div>
+  </div>
+
+  <!-- ==================== КОНТЕЙНЕР ДЛЯ ОКОН ==================== -->
+  <div id="windows-container"></div>
+
+  <!-- ==================== ПРОГРЕСС ЗАРАЖЕНИЯ ==================== -->
+  <div class="infection-bar">
+    <div class="fill"></div>
+    <div class="label" id="infectionLabel">ENCRYPTING FILES... 0%</div>
+  </div>
+
+  <!-- ==================== ФЕЙКОВЫЙ ТАСКБАР ==================== -->
+  <div class="fake-taskbar">
+    <div class="task-icon">⚙</div>
+    <div class="task-icon">⚠</div>
+    <div class="task-icon">💀</div>
+    <div class="task-icon">🔒</div>
+    <div class="task-icon">☠</div>
+    <div class="task-time" id="taskTime">--:--:--</div>
+  </div>
+
+  <!-- ==================== КУРСОР ==================== -->
+  <div class="crosshair" id="crosshair"></div>
+
+  <script>
+    (function() {
+      'use strict';
+
+      // ==================== МАТРИЦА ====================
+      const canvas = document.getElementById('matrix');
+      const ctx = canvas.getContext('2d');
+
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+
+      const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンｱｲｳｴｵABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()';
+      const fontSize = 14;
+      let columns = Math.floor(canvas.width / fontSize);
+      let drops = [];
+      for (let i = 0; i < columns; i++) drops[i] = Math.random() * -100;
+
+      function drawMatrix() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.06)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#ff0000';
+        ctx.font = fontSize + 'px monospace';
+        for (let i = 0; i < drops.length; i++) {
+          const text = chars[Math.floor(Math.random() * chars.length)];
+          ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+          if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+          drops[i]++;
+        }
+      }
+      setInterval(drawMatrix, 50);
+
+      // ==================== ДИНАМИЧЕСКИЕ ОКНА ====================
+      const windowsContainer = document.getElementById('windows-container');
+      const windowTitles = [
+        '⚠ CRITICAL ERROR', '⚠ SYSTEM FAILURE', '⚠ VIRUS DETECTED',
+        '⚠ MEMORY CORRUPTED', '⚠ ACCESS DENIED', '⚠ KERNEL PANIC',
+        '⚠ DATA BREACH', '⚠ RANSOMWARE', '⚠ TROJAN.WIN32',
+        '⚠ WORM.GENERIC', '⚠ BACKDOOR', '⚠ ROOTKIT',
+        '⚠ KEYLOGGER', '⚠ MINER', '⚠ SPYWARE'
+      ];
+      const windowMessages = [
+        'Cannot read memory at 0x7FFE0000',
+        'FATAL: system32\\drivers\\etc\\hosts corrupted',
+        'Your files are being encrypted...',
+        'Sending data to remote server...',
+        'CPU usage: 100% — process svchost.exe',
+        'Attempt to write to protected memory',
+        'HKEY_LOCAL_MACHINE\\SAM access denied',
+        'Boot sector overwritten — reboot required',
+        'Your IP has been logged: 192.168.1.' + Math.floor(Math.random()*255),
+        'Encryption key: AES-256 — 0.5 BTC required',
+        'Downloading payload... 78% complete',
+        'Connection to C2 server established',
+        'User data exfiltrated: 2.4 GB',
+        'Registry modified: disable_taskmgr = 1',
+        'Windows Defender disabled — critical',
+        'Privilege escalation — SYSTEM access',
+        'All restore points deleted',
+        'BIOS firmware flashing... DO NOT POWER OFF',
+        'Camera stream started — 0.3 MP',
+        'Microphone recording — 44.1 kHz',
+        'Keylogger installed — awaiting input',
+        'Cryptominer started — using 100% GPU',
+        'SMB exploit: EternalBlue — 445/tcp',
+        'RDP session hijacked — 3389/tcp',
+        'DNS requests hijacked — spoofing active',
+        'Browser cookies stolen — 1,204 records',
+        'Password database dumped — 89 hashes'
+      ];
+
+      let windowCount = 0;
+      const MAX_WINDOWS = 12;
+
+      function createVirusWindow() {
+        if (windowCount >= MAX_WINDOWS) return;
+        const win = document.createElement('div');
+        win.className = 'virus-window';
+
+        const maxX = window.innerWidth - 320;
+        const maxY = window.innerHeight - 160;
+        let x, y;
+        for (let attempt = 0; attempt < 10; attempt++) {
+          x = 20 + Math.random() * (maxX - 20);
+          y = 20 + Math.random() * (maxY - 20);
+          const centerX = window.innerWidth / 2;
+          const centerY = window.innerHeight / 2;
+          const dist = Math.sqrt(Math.pow(x + 160 - centerX, 2) + Math.pow(y + 60 - centerY, 2));
+          if (dist > 180) break;
+        }
+        win.style.left = x + 'px';
+        win.style.top = y + 'px';
+        win.style.animationDelay = (Math.random() * 0.3) + 's';
+
+        const title = windowTitles[Math.floor(Math.random() * windowTitles.length)];
+        const msg = windowMessages[Math.floor(Math.random() * windowMessages.length)];
+        const errorCode = 'ERR_' + Math.floor(Math.random() * 9999).toString(16).toUpperCase();
+
+        win.innerHTML = `
+          <div class="title-bar">
+            <span>${title}</span>
+            <span class="close-btn">✕</span>
+          </div>
+          <div class="content">
+            ${msg}<br>
+            <span style="font-size:9px;color:#ff6666;opacity:0.7;">${errorCode} — ${new Date().toLocaleTimeString()}</span>
+            <span class="blink-cursor"></span>
+          </div>
+        `;
+        windowsContainer.appendChild(win);
+        windowCount++;
+
+        const lifespan = 3500 + Math.random() * 5000;
+        setTimeout(() => {
+          if (win.parentNode) {
+            win.style.transition = 'opacity 0.4s, transform 0.4s';
+            win.style.opacity = '0';
+            win.style.transform = 'scale(0.8)';
+            setTimeout(() => {
+              if (win.parentNode) win.remove();
+              windowCount--;
+            }, 400);
+          }
+        }, lifespan);
+
+        const moveInterval = setInterval(() => {
+          if (!win.parentNode) { clearInterval(moveInterval); return; }
+          const newX = Math.random() * (window.innerWidth - 200);
+          const newY = Math.random() * (window.innerHeight - 120);
+          win.style.transition = 'left 0.8s ease, top 0.8s ease';
+          win.style.left = Math.max(10, Math.min(newX, window.innerWidth - 200)) + 'px';
+          win.style.top = Math.max(10, Math.min(newY, window.innerHeight - 120)) + 'px';
+        }, 2500 + Math.random() * 2000);
+
+        const observer = new MutationObserver(() => {
+          if (!win.parentNode) { clearInterval(moveInterval); observer.disconnect(); }
+        });
+        observer.observe(windowsContainer, { childList: true });
+      }
+
+      // ==================== ERROR ПОПАПЫ ====================
+      const errorTexts = [
+        'ERROR: ACCESS_VIOLATION_0xC0000005',
+        'FATAL: MEMORY_CORRUPTION_DETECTED',
+        'WARNING: FIREWALL_BYPASSED',
+        'CRITICAL: SYSTEM32_DELETED',
+        'ERROR: ENCRYPTION_IN_PROGRESS',
+        'ALERT: REMOTE_CONNECTION_ESTABLISHED',
+        'DANGER: BOOTKIT_INSTALLED',
+        'ERROR: DATA_EXFILTRATION_ACTIVE',
+        'WARNING: ADMIN_RIGHTS_ESCALATED',
+        'CRITICAL: BIOS_FLASH_IN_PROGRESS',
+        'ERROR: RESTORE_POINTS_REMOVED',
+        'ALERT: CAMERA_ACCESS_GRANTED',
+        'DANGER: MICROPHONE_ACTIVE',
+        'ERROR: GPS_TRACKING_ENABLED',
+        'WARNING: CONTACTS_BEING_UPLOADED',
+        'CRITICAL: PASSWORDS_COMPROMISED',
+        'ERROR: KEYLOGGER_ACTIVE',
+        'ALERT: SCREEN_CAPTURE_STARTED',
+        'DANGER: CRYPTO_WALLET_FOUND',
+        'WARNING: BROWSER_HIJACKED'
+      ];
+
+      function createErrorPopup() {
+        const popup = document.createElement('div');
+        popup.className = 'error-popup';
+        const x = Math.random() * (window.innerWidth - 280);
+        const y = Math.random() * (window.innerHeight - 50);
+        popup.style.left = Math.max(10, x) + 'px';
+        popup.style.top = Math.max(10, y) + 'px';
+        popup.style.animationDelay = (Math.random() * 0.2) + 's';
+        popup.textContent = errorTexts[Math.floor(Math.random() * errorTexts.length)];
+        document.body.appendChild(popup);
+        setTimeout(() => {
+          if (popup.parentNode) {
+            popup.style.transition = 'opacity 0.3s, transform 0.3s';
+            popup.style.opacity = '0';
+            popup.style.transform = 'scale(1.3)';
+            setTimeout(() => { if (popup.parentNode) popup.remove(); }, 300);
+          }
+        }, 1200 + Math.random() * 1800);
+      }
+
+      // ==================== HUD ЛОГ ====================
+      const logLines = document.getElementById('logLines');
+      const logMessages = [
+        '> Injecting payload into svchost.exe...',
+        '> Bypassing Windows Defender...',
+        '> Elevating privileges to SYSTEM...',
+        '> Downloading encryption key from C2...',
+        '> Encrypting C:\\Users\\Documents...',
+        '> Encrypting C:\\Users\\Pictures...',
+        '> Encrypting C:\\Users\\Downloads...',
+        '> Stealing browser cookies...',
+        '> Capturing keystrokes...',
+        '> Recording microphone audio...',
+        '> Accessing webcam feed...',
+        '> Uploading data to 185.xxx.xxx.xxx...',
+        '> Deleting shadow copies...',
+        '> Disabling system restore...',
+        '> Modifying boot sector...',
+        '> Installing rootkit...',
+        '> Establishing persistence...',
+        '> Disabling Task Manager...',
+        '> Disabling Registry Editor...',
+        '> Blocking antivirus updates...',
+        '> Scanning local network...',
+        '> Brute-forcing SMB credentials...',
+        '> Spreading to connected devices...',
+        '> Encrypting files: 1240/3000...',
+        '> Uploading encryption key... DONE',
+        '> Waiting for ransom payment...'
+      ];
+
+      function addLogLine() {
+        const line = document.createElement('div');
+        line.className = 'log-line';
+        const msg = logMessages[Math.floor(Math.random() * logMessages.length)];
+        const time = new Date().toLocaleTimeString();
+        line.textContent = `[${time}] ${msg}`;
+        logLines.appendChild(line);
+        if (logLines.children.length > 7) logLines.removeChild(logLines.firstChild);
+      }
+      setInterval(addLogLine, 900);
+      addLogLine();
+
+      // ==================== СТАТИСТИКА ====================
+      setInterval(() => {
+        document.getElementById('cpuVal').textContent = (90 + Math.floor(Math.random() * 10)) + '%';
+        document.getElementById('ramVal').textContent = (92 + Math.floor(Math.random() * 7)) + '%';
+        document.getElementById('diskVal').textContent = (0.8 + Math.random() * 0.8).toFixed(1) + ' GB/s';
+        document.getElementById('netVal').textContent = '↑ ' + (30 + Math.floor(Math.random() * 30)) + ' MB/s';
+        document.getElementById('procVal').textContent = 200 + Math.floor(Math.random() * 80);
+        const files = document.getElementById('filesVal');
+        const cur = parseInt(files.textContent.replace(/,/g, ''));
+        files.textContent = (cur + Math.floor(Math.random() * 40)).toLocaleString();
+        const octet = () => Math.floor(Math.random() * 255);
+        document.getElementById('ipVal').textContent = `${octet()}.${octet()}.${octet()}.${octet()}`;
+      }, 600);
+
+      // ==================== ПРОГРЕСС ЗАРАЖЕНИЯ ====================
+      let infectionPct = 0;
+      setInterval(() => {
+        infectionPct = (infectionPct + 1) % 101;
+        document.getElementById('infectionLabel').textContent =
+          infectionPct < 100 ? `ENCRYPTING FILES... ${infectionPct}%` : '🔒 ALL FILES ENCRYPTED — PAY RANSOM';
+      }, 200);
+
+      // ==================== ВРЕМЯ В ТАСКБАРЕ ====================
+      setInterval(() => {
+        const d = new Date();
+        document.getElementById('taskTime').textContent = d.toLocaleTimeString();
+      }, 1000);
+
+      // ==================== DATA STREAM (кража данных) ====================
+      const dataItems = [
+        'credit_card_4521.txt', 'password_dump.hash', 'browser_cookies.sqlite',
+        'wallet.dat', 'private_key.pem', 'contacts.csv', 'photos.zip',
+        'documents.rar', 'messages.db', 'telegram_session', 'ssh_keys',
+        'passport_scan.jpg', 'bank_statement.pdf', '2fa_backup.txt'
+      ];
+
+      function createDataStream() {
+        const el = document.createElement('div');
+        el.className = 'data-stream';
+        el.textContent = '⇗ ' + dataItems[Math.floor(Math.random() * dataItems.length)];
+        el.style.left = (Math.random() * 80 + 10) + '%';
+        el.style.top = (Math.random() * 70 + 15) + '%';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 4000);
+      }
+      setInterval(createDataStream, 800);
+
+      // ==================== ФЕЙКОВОЕ УВЕДОМЛЕНИЕ БРАУЗЕРА ====================
+      const notifMessages = [
+        { title: 'Защита Windows', body: 'Обнаружено 47 угроз. Ваши файлы могут быть повреждены.' },
+        { title: 'Chrome Security', body: 'Обнаружена подозрительная активность. Нажмите для сканирования.' },
+        { title: 'System Alert', body: 'Ваше устройство заражено 12 вирусами. Немедленно очистите.' },
+        { title: 'Microsoft Defender', body: 'Защита отключена злоумышленником. Данные под угрозой.' },
+        { title: 'Безопасность', body: 'Неизвестное приложение получило доступ к вашей камере.' }
+      ];
+
+      function createFakeNotif() {
+        const notif = document.createElement('div');
+        notif.className = 'browser-fake-notif';
+        const msg = notifMessages[Math.floor(Math.random() * notifMessages.length)];
+        notif.innerHTML = `
+          <div class="nf-header">
+            <div class="nf-icon">⚠</div>
+            <div class="nf-title">${msg.title}</div>
+          </div>
+          <div class="nf-body">${msg.body}</div>
+          <div class="nf-app">Безопасность Windows • только что</div>
+        `;
+        document.body.appendChild(notif);
+        setTimeout(() => {
+          notif.style.transition = 'transform 0.4s, opacity 0.4s';
+          notif.style.transform = 'translateX(120%)';
+          notif.style.opacity = '0';
+          setTimeout(() => notif.remove(), 400);
+        }, 3500);
+      }
+      setTimeout(createFakeNotif, 2000);
+      setInterval(createFakeNotif, 9000);
+
+      // ==================== RANSOM МОДАЛ ====================
+      function createRansomModal() {
+        if (document.querySelector('.ransom-modal')) return;
+        const modal = document.createElement('div');
+        modal.className = 'ransom-modal';
+        const wallet = '1A2b3C4d5E6f7G8h9I0jK1l2M3n4O5p6Q7r8S9t0U';
+        modal.innerHTML = `
+          <h2>🔒 YOUR FILES ARE ENCRYPTED</h2>
+          <div style="font-size:11px;color:#ff6666;margin-top:4px;">AES-256 military-grade encryption</div>
+          <div class="price">0.5 BTC</div>
+          <div style="font-size:10px;color:#ff4444;">Send to this Bitcoin wallet:</div>
+          <div class="wallet">${wallet}</div>
+          <div class="timer" id="ransomTimer">23:59:59</div>
+          <div class="warn">⏰ After the timer ends, your decryption key<br>will be permanently deleted.<br>Do NOT restart your computer.</div>
+        `;
+        document.body.appendChild(modal);
+
+        let seconds = 23 * 3600 + 59 * 60 + 59;
+        const timerEl = modal.querySelector('#ransomTimer');
+        const timerInterval = setInterval(() => {
+          if (!modal.parentNode) { clearInterval(timerInterval); return; }
+          seconds--;
+          if (seconds < 0) { seconds = 0; clearInterval(timerInterval); }
+          const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
+          const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+          const s = String(seconds % 60).padStart(2, '0');
+          timerEl.textContent = `${h}:${m}:${s}`;
+        }, 1000);
+
+        // исчезает и появляется заново
+        setTimeout(() => {
+          if (modal.parentNode) {
+            modal.style.transition = 'opacity 0.5s, transform 0.5s';
+            modal.style.opacity = '0';
+            modal.style.transform = 'translate(-50%, -50%) scale(0.8)';
+            setTimeout(() => { if (modal.parentNode) modal.remove(); }, 500);
+          }
+        }, 12000);
+      }
+      setTimeout(createRansomModal, 4000);
+      setInterval(createRansomModal, 18000);
+
+      // ==================== ЗАПУСК ЦИКЛОВ ====================
+      setInterval(createVirusWindow, 1400);
+      setTimeout(createVirusWindow, 100);
+      setTimeout(createVirusWindow, 300);
+      setTimeout(createVirusWindow, 600);
+      setTimeout(createVirusWindow, 900);
+
+      setInterval(createErrorPopup, 800);
+      setTimeout(createErrorPopup, 200);
+      setTimeout(createErrorPopup, 500);
+
+      // ==================== КУРСОР ====================
+      const crosshair = document.getElementById('crosshair');
+      document.addEventListener('mousemove', (e) => {
+        crosshair.style.left = e.clientX + 'px';
+        crosshair.style.top = e.clientY + 'px';
+      });
+      document.addEventListener('touchmove', (e) => {
+        const t = e.touches[0];
+        crosshair.style.left = t.clientX + 'px';
+        crosshair.style.top = t.clientY + 'px';
+      }, { passive: true });
+
+      // ==================== БЛОКИРОВКИ ====================
+      document.addEventListener('contextmenu', (e) => e.preventDefault());
+      document.addEventListener('selectstart', (e) => e.preventDefault());
+      document.addEventListener('dragstart', (e) => e.preventDefault());
+      window.addEventListener('beforeunload', (e) => {
+        e.preventDefault();
+        e.returnValue = '';
+        return '';
+      });
+
+      // ==================== ГЛИТЧ ЗАГОЛОВКА ====================
+      const mainTitle = document.querySelector('.center-alert h1');
+      const originalText = mainTitle.textContent;
+      const glitchChars = '!@#$%^&*()_+{}[]|;:<>?~';
+      setInterval(() => {
+        if (Math.random() > 0.7) {
+          let glitched = '';
+          for (let i = 0; i < originalText.length; i++) {
+            if (Math.random() > 0.85) {
+              glitched += glitchChars[Math.floor(Math.random() * glitchChars.length)];
+            } else {
+              glitched += originalText[i];
+            }
+          }
+          mainTitle.textContent = glitched;
+          setTimeout(() => { mainTitle.textContent = originalText; }, 100);
+        }
+      }, 800);
+
+      // ==================== ЗВУК ====================
+      let audioCtx = null;
+      let humOsc = null;
+      let alarmInterval = null;
+      let audioStarted = false;
+
+      function startAudio() {
+        if (audioStarted) return;
+        audioStarted = true;
+        try {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.value = 55;
+          gain.gain.value = 0.02;
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          humOsc = osc;
+          setInterval(() => {
+            if (humOsc) humOsc.frequency.value = 40 + Math.random() * 80;
+          }, 600);
+
+          // периодический тревожный "писк"
+          alarmInterval = setInterval(() => {
+            if (!audioCtx) return;
+            try {
+              const beepOsc = audioCtx.createOscillator();
+              const beepGain = audioCtx.createGain();
+              beepOsc.type = 'square';
+              beepOsc.frequency.value = 880 + Math.random() * 440;
+              beepGain.gain.value = 0.015;
+              beepOsc.connect(beepGain);
+              beepGain.connect(audioCtx.destination);
+              beepOsc.start();
+              beepOsc.stop(audioCtx.currentTime + 0.08);
+            } catch (e) {}
+          }, 1800);
+        } catch (e) {}
+      }
+
+      // запуск аудио по первому взаимодействию
+      ['click', 'touchstart', 'keydown', 'mousemove'].forEach(evt => {
+        document.addEventListener(evt, startAudio, { once: true, passive: true });
+      });
+
+      // ==================== ТАЙТЛ ВКЛАДКИ ====================
+      const tabTitles = [
+        '⚠ SYSTEM HACKED', '⚠ VIRUS DETECTED', '⚠ ERROR',
+        '⚠ INFECTED', '⚠ RANSOMWARE', '⚠ 0.5 BTC REQUIRED',
+        '💀 YOUR FILES ARE GONE', '🔒 PAY TO UNLOCK'
+      ];
+      let tabIndex = 0;
+      setInterval(() => {
+        tabIndex = (tabIndex + 1) % tabTitles.length;
+        document.title = tabTitles[tabIndex];
+      }, 1500);
+
+      // ==================== ЭФФЕКТ "ПОМЕХИ ЭКРАНА" ====================
+      const body = document.body;
+      setInterval(() => {
+        if (Math.random() > 0.85) {
+          body.style.filter = 'hue-rotate(' + Math.random() * 30 + 'deg) invert(0.03) contrast(1.1)';
+          setTimeout(() => { body.style.filter = ''; }, 60);
+        }
+      }, 500);
+
+      // ==================== СЛУЧАЙНЫЙ СДВИГ СЛОЁВ (глитч) ====================
+      const layers = ['.red-pulse', '.scanlines', '.vhs-noise', '.chromatic'];
+      setInterval(() => {
+        if (Math.random() > 0.8) {
+          const layer = document.querySelector(layers[Math.floor(Math.random() * layers.length)]);
+          if (layer) {
+            layer.style.transform = `translate(${(Math.random()-0.5)*8}px, ${(Math.random()-0.5)*8}px)`;
+            setTimeout(() => { layer.style.transform = ''; }, 100);
+          }
+        }
+      }, 400);
+
+    })();
+  </script>
+
+</body>
+</html>
